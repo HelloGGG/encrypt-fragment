@@ -158,71 +158,70 @@ export class RSAKey {
     }
 
     /**
-     * 加密入参处理
-     * @param {any} val 加密串入参
-     */
-    private makeSecureStr(val:any) {
-        if (typeof val === "string") {
-            return val;
-        }
-        try {
-            const res = JSON.stringify(val, null, .5);
-            return res;
-        } catch (e) {
-            throw new TypeError("is a type error, make sure your encrypt text is right.");
-        }
-    }
-
-    /**
      * 长文本加密
-     * @param {string} any 待加密长文本或json对象
-     * @param {number} size 密钥长度
+     * @param {string} string 待加密长文本
      * @returns {string} 加密后的base64编码
      */
-    public encryptLong(text:any, size:number) {
-        const maxLength = ((this.n.bitLength() + 7) >> 3) - 11;
-
-        text = this.makeSecureStr(text);
+    public encryptLong(string: string) {
+        var k = this;
+        var maxLength = (((k.n.bitLength() + 7) >> 3) - 11);
+        // console.log('maxLength', maxLength)
         try {
-            let ct = "";
-
-            if (text.length > maxLength) {
-                let reg = /.{1,117}/g;
-                switch (size) {
-                    case 512: reg = /.{1,53}/g; break;
-                    case 1024: reg = /.{1,117}/g; break;
-                    case 2048: reg = /.{1,245}/g; break;
-                    case 4096: reg = /.{1,501}/g; break;
-                    default: reg = /.{1,117}/g; break;
+            var subStr="", encryptedString = "";
+            var subStart = 0;
+            var bitLen = 0;
+            for(var i = 0, len = string.length; i < len; i++){
+                //js 是使用 Unicode 编码的，每个字符所占用的字节数不同
+                var charCode = string.charCodeAt(i);
+                var increment = 0;
+                if(charCode <= 0x007f) {
+                    increment = 1;
+                }else if(charCode <= 0x07ff){
+                    increment = 2;
+                }else if(charCode <= 0xffff){
+                    increment = 3;
+                }else{
+                    increment = 4;
                 }
-                const lt = text.match(reg);
-                lt.forEach((entry:string) => {
-                    const t1 = this.encrypt(entry);
-                    ct += t1;
-                });
-                return hex2b64(ct);
+                bitLen += increment;
+            
+                //字节数到达上限，获取子字符串加密并追加到总字符串后。更新下一个字符串起始位置及字节计算。
+                if (bitLen > maxLength) {
+                    // 本位字符加上会过长，回到上一位
+                    i--
+                    subStr = string.substring(subStart, i);
+                    // console.log(subStart, i, subStr);
+                    let t = k.encrypt(subStr);
+                    // console.log(t)
+                    encryptedString += t
+                    // substring第i位不会被取到。-1是因为进入下次循环时，i+1导致上一位被忽略，得回去把它带上
+                    subStart = i--;
+                    bitLen = 0;
+                }
             }
-            const t = this.encrypt(text);
-            const y = hex2b64(t);
-            return y;
+            subStr=string.substring(subStart,len)
+            // console.log(subStr)
+            encryptedString += k.encrypt(subStr);
+            // return encryptedString
+            return hex2b64(encryptedString);
         } catch (ex) {
-            return false;
+          return false;
         }
     }
 
     /**
      * 长文本解密
-     * @param {string} string 加密后的base64编码
-     * @param {number} size 密钥长度
+     * @param {string} text 加密后的base64编码
      * @returns {string} 解密后的原文
      */
-    public decryptLong(text:string, size:number) {
+    public decryptLong(text:string) {
         const maxLength = (this.n.bitLength() + 7) >> 3;
         text = b64tohex(text);
         try {
             if (text.length > maxLength) {
                 let ct = "";
                 let reg = /.{1,256}/g;
+                const size = maxLength * 8;
                 switch (size) {
                     case 512: reg = /.{1,128}/g; break;
                     case 1024: reg = /.{1,256}/g; break;

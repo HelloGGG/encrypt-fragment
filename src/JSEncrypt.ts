@@ -111,19 +111,17 @@ export default class JSEncrypt {
      */
     public encryptLong(str:string) {
         try {
-            let encrypted = this.getKey().encryptLong(str, this.default_key_size) || "";
-            let uncrypted = this.getKey().decryptLong(encrypted, this.default_key_size) || "";
+            let encrypted = this.getKey().encryptLong(str) || "";
+            let uncrypted = this.getKey().decryptLong(encrypted) || "";
             let count = 0;
-            const reg = /null$/g;
-            while (reg.test(uncrypted)) {
+            while (str !== uncrypted) {
                 // 如果加密出错，重新加密
                 count++;
-                encrypted = this.getKey().encryptLong(str, this.default_key_size) || "";
-                uncrypted = this.getKey().decryptLong(encrypted, this.default_key_size) || "";
-                // console.log('加密出错次数', count)
+                encrypted = this.getKey().encryptLong(str) || "";
+                uncrypted = this.getKey().decryptLong(encrypted) || "";
                 if (count > 10) {
                     // 重复加密不能大于10次
-                    // console.log('加密次数过多')
+                    console.log('加密次数过多')
                     break;
                 }
             }
@@ -141,7 +139,7 @@ export default class JSEncrypt {
      */
     public decryptLong(str:string) {
         try {
-            return this.getKey().decryptLong(str, this.default_key_size);
+            return this.getKey().decryptLong(str);
         } catch (ex) {
             return false;
         }
