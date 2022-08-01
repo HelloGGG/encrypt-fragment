@@ -1,6 +1,6 @@
 {
     "name": "encrypt-fragment",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "基于jsencrypt扩展的支持RSA分段加解密的库",
     "license": "MIT",
     "main": "bin/jsencrypt.js",

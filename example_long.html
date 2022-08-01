@@ -7,13 +7,19 @@
 
     <body>
         <input type="button" id="btn" value="点我" />
+        <span>F12打开开发者工具查看加解密结果</span>
         <div>密钥长度</div>
-        <input id="key-size" type="text" placeholder="enter key size">
+        <input id="key-size" value="512" type="text" placeholder="enter key size:(512 or 1024 or 2048 or 4096)">
         <div>公钥</div>
         <textarea id="tra" rows="15" cols="65">MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKjtJW+PjF4B9xPgAi0fchR38vxwoW8tJe473bRBo8Yhpz23akPo1hmLrC8syR9xhiLF6RFb601mY8uKxHC9KNsCAwEAAQ==</textarea>
         <div>私钥</div>
         <textarea id="sra" rows="15" cols="65">MIIBVgIBADANBgkqhkiG9w0BAQEFAASCAUAwggE8AgEAAkEAqO0lb4+MXgH3E+ACLR9yFHfy/HChby0l7jvdtEGjxiGnPbdqQ+jWGYusLyzJH3GGIsXpEVvrTWZjy4rEcL0o2wIDAQABAkBx01nmUlPDBI/4VHki7o1wPWL9tucQgtuMK8q4K4KvfeUPqx3gSN/VEtS9SZpz1/yyRQNe7EY2ybxLVJRHdlQBAiEA2y3sJbOSGjiYvV5nA5XDDkGg/2OnD6VBDkyHVqRF9RcCIQDFTgfZpUMRx8wa32/t/kI4v1843gh99TlxkjVVJjCM3QIhAMpLMFH70zVwV0kxAFNGvqlB2Z7eEytVkx3ndGJ7bDYxAiEAh6qC3VW0S1qNboDqjsPAtxJnoEuTnUBr8jqtb1ImGgUCIQCY+5Wuakxho/jpa0Jwy4APpUBSniE9koN9i4qFCJBtvA==</textarea>
     </body>
+    <style>
+        #key-size {
+            min-width: 300px;
+        }
+    </style>
     <script src="./jquery.js"></script>
     <!--引入jsencrypt.js-->
     <script src="./bin/jsencrypt.js"></script>
