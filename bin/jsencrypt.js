@@ -129,18 +129,18 @@ function b64tohex(s) {
 }
 
 /*! *****************************************************************************
-Copyright (c) Microsoft Corporation. All rights reserved.
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-this file except in compliance with the License. You may obtain a copy of the
-License at http://www.apache.org/licenses/LICENSE-2.0
+Copyright (c) Microsoft Corporation.
 
-THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-MERCHANTABLITY OR NON-INFRINGEMENT.
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
 
-See the Apache Version 2.0 License for specific language governing permissions
-and limitations under the License.
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
 ***************************************************************************** */
 /* global Reflect, Promise */
 
@@ -2956,17 +2956,53 @@ var RSAKey = /** @class */ (function () {
         }
     };
     /**
+     * 加密入参处理
+     * @param {any} val 加密串入参
+     */
+    RSAKey.prototype.makeSecureStr = function (val) {
+        if (typeof val === "string") {
+            return val;
+        }
+        try {
+            var res = JSON.stringify(val, null, .5);
+            return res;
+        }
+        catch (e) {
+            throw new TypeError("is a type error, make sure your encrypt text is right.");
+        }
+    };
+    /**
      * 长文本加密
-     * @param {string} string 待加密长文本
+     * @param {string} any 待加密长文本或json对象
+     * @param {number} size 密钥长度
      * @returns {string} 加密后的base64编码
      */
-    RSAKey.prototype.encryptLong = function (text) {
+    RSAKey.prototype.encryptLong = function (text, size) {
         var _this = this;
         var maxLength = ((this.n.bitLength() + 7) >> 3) - 11;
+        text = this.makeSecureStr(text);
         try {
             var ct_1 = "";
             if (text.length > maxLength) {
-                var lt = text.match(/.{1,117}/g);
+                var reg = /.{1,117}/g;
+                switch (size) {
+                    case 512:
+                        reg = /.{1,53}/g;
+                        break;
+                    case 1024:
+                        reg = /.{1,117}/g;
+                        break;
+                    case 2048:
+                        reg = /.{1,245}/g;
+                        break;
+                    case 4096:
+                        reg = /.{1,501}/g;
+                        break;
+                    default:
+                        reg = /.{1,117}/g;
+                        break;
+                }
+                var lt = text.match(reg);
                 lt.forEach(function (entry) {
                     var t1 = _this.encrypt(entry);
                     ct_1 += t1;
@@ -2984,16 +3020,35 @@ var RSAKey = /** @class */ (function () {
     /**
      * 长文本解密
      * @param {string} string 加密后的base64编码
+     * @param {number} size 密钥长度
      * @returns {string} 解密后的原文
      */
-    RSAKey.prototype.decryptLong = function (text) {
+    RSAKey.prototype.decryptLong = function (text, size) {
         var _this = this;
         var maxLength = (this.n.bitLength() + 7) >> 3;
         text = b64tohex(text);
         try {
             if (text.length > maxLength) {
                 var ct_2 = "";
-                var lt = text.match(/.{1,256}/g); // 128位解密。取256位
+                var reg = /.{1,256}/g;
+                switch (size) {
+                    case 512:
+                        reg = /.{1,128}/g;
+                        break;
+                    case 1024:
+                        reg = /.{1,256}/g;
+                        break;
+                    case 2048:
+                        reg = /.{1,512}/g;
+                        break;
+                    case 4096:
+                        reg = /.{1,1024}/g;
+                        break;
+                    default:
+                        reg = /.{1,256}/g;
+                        break;
+                }
+                var lt = text.match(reg); // 128位解密。取256位
                 lt.forEach(function (entry) {
                     var t1 = _this.decrypt(entry);
                     ct_2 += t1;
@@ -5335,15 +5390,15 @@ var JSEncrypt = /** @class */ (function () {
      */
     JSEncrypt.prototype.encryptLong = function (str) {
         try {
-            var encrypted = this.getKey().encryptLong(str) || "";
-            var uncrypted = this.getKey().decryptLong(encrypted) || "";
+            var encrypted = this.getKey().encryptLong(str, this.default_key_size) || "";
+            var uncrypted = this.getKey().decryptLong(encrypted, this.default_key_size) || "";
             var count = 0;
             var reg = /null$/g;
             while (reg.test(uncrypted)) {
                 // 如果加密出错，重新加密
                 count++;
-                encrypted = this.getKey().encryptLong(str) || "";
-                uncrypted = this.getKey().decryptLong(encrypted) || "";
+                encrypted = this.getKey().encryptLong(str, this.default_key_size) || "";
+                uncrypted = this.getKey().decryptLong(encrypted, this.default_key_size) || "";
                 // console.log('加密出错次数', count)
                 if (count > 10) {
                     // 重复加密不能大于10次
@@ -5365,7 +5420,7 @@ var JSEncrypt = /** @class */ (function () {
      */
     JSEncrypt.prototype.decryptLong = function (str) {
         try {
-            return this.getKey().decryptLong(str);
+            return this.getKey().decryptLong(str, this.default_key_size);
         }
         catch (ex) {
             return false;
@@ -5467,7 +5522,7 @@ var JSEncrypt = /** @class */ (function () {
         // Return the private representation of this key.
         return this.getKey().getPublicBaseKeyB64();
     };
-    JSEncrypt.version = "3.1.2";
+    JSEncrypt.version = "1.0.0";
     return JSEncrypt;
 }());
 

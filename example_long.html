@@ -2,101 +2,63 @@
 <html>
     <head>
         <meta charset="UTF-8" />
-        <title>使用jsencrypt执行长文本加密，解密</title>
+        <title>使用jsencrypt执行长文本分段加密，解密</title>
     </head>
 
     <body>
         <input type="button" id="btn" value="点我" />
-        <textarea id="tra" rows="15" cols="65">
-            MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDKX1Fs2JUD25zrAEwPnjnZC0az
-rl1XjGzGrJ64eb1lr9QVVOO2zGKZdqDLZD4Ut4Mp6GHMaqqFXKm+zN7IAXu+mqZb
-UrqUziHE5YGC02wObiZEzfa6V9a8ZvqpB+Z8KO+hAkkjzjMl+E+hDORpZmez3SMz
-etn7mcCeLw8/vmxz3QIDAQAB
-        </textarea>
-        <textarea id="sra" rows="15" cols="65">
-            MIICXgIBAAKBgQDKX1Fs2JUD25zrAEwPnjnZC0azrl1XjGzGrJ64eb1lr9QVVOO2
-zGKZdqDLZD4Ut4Mp6GHMaqqFXKm+zN7IAXu+mqZbUrqUziHE5YGC02wObiZEzfa6
-V9a8ZvqpB+Z8KO+hAkkjzjMl+E+hDORpZmez3SMzetn7mcCeLw8/vmxz3QIDAQAB
-AoGBAJBr6b4V6nJwXdHPyngy4PGl/HTqcK60BkTamALqzmEtU9tNU5z2yz7dy+6a
-wTsjo7Vao8CwNrUp5fHGXw65EEc1/3Iu2Fiix0XF7RP4NFSoxbBmzQW1nUK/5DFi
-4VR1uhEmdbgLwGabsdqzeUqhRKkRGAPVCotBjaDBOu0J3Mu5AkEA+SM7Ctu7evOv
-ZwjWrp9a5MGxJ9yLLabbIuWL+420jr2G6ojaTZ2ROA2DWWQPx4JqWxDHttomrb38
-dk2emP2WAwJBAM/yU58YRQ+dTeuTzNYC1JdWcs35n9+hoVP7y+x29CmcqDTPp3nR
-Bbbq88yMb2nZdlwthWi7BurNHsRJFqj0GJ8CQF5gJCuW1UxcJ2PGi1yW7R2e6fcJ
-qoden8B2aDKgmXdBAGyz7s5cE/jB1bH1H60aECPzFVSFCwXh5FMEUEHwPfUCQQC7
-JqZ57lbhebrSRcA58GwzFFvY40wu8gIHWvwqgti2xsZgWW+qZCPXf9gSBWaUhmJP
-Da0fGAxesGN7VyhswNuTAkEAzCFNqL/zwHXcwh9YyHTdk/bRWIJq49jTA+vbgGv0
-szKIvGRKoRbub3NEUiI80TDsCAvbJ6R80J7RjnpmShOwcA==
-        </textarea>
+        <div>密钥长度</div>
+        <input id="key-size" type="text" placeholder="enter key size">
+        <div>公钥</div>
+        <textarea id="tra" rows="15" cols="65">MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKjtJW+PjF4B9xPgAi0fchR38vxwoW8tJe473bRBo8Yhpz23akPo1hmLrC8syR9xhiLF6RFb601mY8uKxHC9KNsCAwEAAQ==</textarea>
+        <div>私钥</div>
+        <textarea id="sra" rows="15" cols="65">MIIBVgIBADANBgkqhkiG9w0BAQEFAASCAUAwggE8AgEAAkEAqO0lb4+MXgH3E+ACLR9yFHfy/HChby0l7jvdtEGjxiGnPbdqQ+jWGYusLyzJH3GGIsXpEVvrTWZjy4rEcL0o2wIDAQABAkBx01nmUlPDBI/4VHki7o1wPWL9tucQgtuMK8q4K4KvfeUPqx3gSN/VEtS9SZpz1/yyRQNe7EY2ybxLVJRHdlQBAiEA2y3sJbOSGjiYvV5nA5XDDkGg/2OnD6VBDkyHVqRF9RcCIQDFTgfZpUMRx8wa32/t/kI4v1843gh99TlxkjVVJjCM3QIhAMpLMFH70zVwV0kxAFNGvqlB2Z7eEytVkx3ndGJ7bDYxAiEAh6qC3VW0S1qNboDqjsPAtxJnoEuTnUBr8jqtb1ImGgUCIQCY+5Wuakxho/jpa0Jwy4APpUBSniE9koN9i4qFCJBtvA==</textarea>
     </body>
     <script src="./jquery.js"></script>
     <!--引入jsencrypt.js-->
     <script src="./bin/jsencrypt.js"></script>
     <script type="text/javascript">
-        let startTime = new Date();
-        //公钥
-        const PUBLIC_KEY = `
-        -----BEGIN PUBLIC KEY-----
-        MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDKX1Fs2JUD25zrAEwPnjnZC0az
-        rl1XjGzGrJ64eb1lr9QVVOO2zGKZdqDLZD4Ut4Mp6GHMaqqFXKm+zN7IAXu+mqZb
-        UrqUziHE5YGC02wObiZEzfa6V9a8ZvqpB+Z8KO+hAkkjzjMl+E+hDORpZmez3SMz
-        etn7mcCeLw8/vmxz3QIDAQAB
-        -----END PUBLIC KEY-----`;
-        //私钥
-        const PRIVATE_KEY = `
-        -----BEGIN PUBLIC KEY-----
-        MIICXgIBAAKBgQDKX1Fs2JUD25zrAEwPnjnZC0azrl1XjGzGrJ64eb1lr9QVVOO2
-        zGKZdqDLZD4Ut4Mp6GHMaqqFXKm+zN7IAXu+mqZbUrqUziHE5YGC02wObiZEzfa6
-        V9a8ZvqpB+Z8KO+hAkkjzjMl+E+hDORpZmez3SMzetn7mcCeLw8/vmxz3QIDAQAB
-        AoGBAJBr6b4V6nJwXdHPyngy4PGl/HTqcK60BkTamALqzmEtU9tNU5z2yz7dy+6a
-        wTsjo7Vao8CwNrUp5fHGXw65EEc1/3Iu2Fiix0XF7RP4NFSoxbBmzQW1nUK/5DFi
-        4VR1uhEmdbgLwGabsdqzeUqhRKkRGAPVCotBjaDBOu0J3Mu5AkEA+SM7Ctu7evOv
-        ZwjWrp9a5MGxJ9yLLabbIuWL+420jr2G6ojaTZ2ROA2DWWQPx4JqWxDHttomrb38
-        dk2emP2WAwJBAM/yU58YRQ+dTeuTzNYC1JdWcs35n9+hoVP7y+x29CmcqDTPp3nR
-        Bbbq88yMb2nZdlwthWi7BurNHsRJFqj0GJ8CQF5gJCuW1UxcJ2PGi1yW7R2e6fcJ
-        qoden8B2aDKgmXdBAGyz7s5cE/jB1bH1H60aECPzFVSFCwXh5FMEUEHwPfUCQQC7
-        JqZ57lbhebrSRcA58GwzFFvY40wu8gIHWvwqgti2xsZgWW+qZCPXf9gSBWaUhmJP
-        Da0fGAxesGN7VyhswNuTAkEAzCFNqL/zwHXcwh9YyHTdk/bRWIJq49jTA+vbgGv0
-        szKIvGRKoRbub3NEUiI80TDsCAvbJ6R80J7RjnpmShOwcA==
-        -----END PUBLIC KEY-----`;
+        document.getElementById('btn').addEventListener('click', () => {
+            let startTime = new Date();
 
-        // 使用设置公私钥
-        const enc = new JSEncrypt();
-        enc.setPublicKey(PUBLIC_KEY);
-        enc.setPublicKey(PRIVATE_KEY);
+            // 使用设置公私钥
+            const enc = new JSEncrypt({
+                default_key_size: Number(document.getElementById('key-size').value) || 1024
+            });
+            enc.setPublicKey(document.getElementById('tra').value);
+            enc.setPrivateKey(document.getElementById('sra').value);
 
-        // 一段长文本json
-        let data = {
-            code: 200,
-            result: {
-                timestamp: 1572321851823,
-                interaction: [
-                    {
-                        type: "shootYourBullet",
-                        body:
-                            '{"actId":"241532192085135360","timestamp":1572321762049,"actTempId":"2","queIds":["10020"],"actTime":60,"online_trace_id":null}',
-                        liveId: 100066318,
-                        lecturerId: "XN014604",
-                        tutorId: "XN014606",
-                        parentType: "interaction",
-                        module: "START",
-                        command: "START",
-                        stuId: null,
-                        online_trace_id: "fhCb3oVqjM"
-                    }
-                ],
-                upStream: {},
-                downStream: {},
-                liveStream: []
-            }
-        };
-        data = JSON.stringify(data);
-        let encrypted = enc.encryptLong(data);
-        let endTime = new Date();
-        console.log("加密后数据:%o", encrypted);
-        console.log("加密时间" + (endTime - startTime) + "ms");
-        //使用私钥解密
-        let uncrypted = enc.decryptLong(encrypted);
-        console.log("解密后数据:%o", uncrypted);
+            // 一段长文本json
+            let data = {
+                code: 200,
+                result: {
+                    timestamp: 1572321851823,
+                    interaction: [
+                        {
+                            type: 'shootYourBullet',
+                            body: '{"actId":"241532192085135360","timestamp":1572321762049,"actTempId":"2","queIds":["10020"],"actTime":60,"online_trace_id":null}',
+                            liveId: 100066318,
+                            lecturerId: 'XN014604',
+                            tutorId: 'XN014606',
+                            parentType: 'interaction',
+                            module: 'START',
+                            command: 'START',
+                            stuId: null,
+                            online_trace_id: 'fhCb3oVqjM'
+                        }
+                    ],
+                    upStream: {},
+                    downStream: {},
+                    liveStream: []
+                }
+            };
+            let encrypted = enc.encryptLong(data);
+            let endTime = new Date();
+            console.log('加密后数据:%o', encrypted);
+            console.log('加密时间' + (endTime - startTime) + 'ms');
+            //使用私钥解密
+            let uncrypted = enc.decryptLong(encrypted);
+            console.log('解密后数据:%o', uncrypted);
+        });
     </script>
 </html>

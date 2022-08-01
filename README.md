@@ -1,4 +1,4 @@
-# encryptlong
+# encrypt-fragment
 
 # 原版官方网站
 
@@ -6,12 +6,12 @@ http://travistidwell.com/jsencrypt
 
 # 介绍
 
-基于 jsencrypt 扩展长文本分段加解密功能
+基于 jsencrypt 扩展分段加解密功能
 
 npm 安装：
 
 ```bash
-npm i encryptlong -S
+npm i encrypt-fragment -S
 ```
 
 浏览器使用：
@@ -21,6 +21,8 @@ npm i encryptlong -S
 ```
 
 # 基本使用
+
+
 
 > 注意：使用长文本加密时最好公私钥都要设置，避免有概率加密失败
 
@@ -58,9 +60,11 @@ szKIvGRKoRbub3NEUiI80TDsCAvbJ6R80J7RjnpmShOwcA==
 -----END PUBLIC KEY-----`;
 
 // 使用设置公私钥
-const enc = new JSEncrypt();
+const enc = new JSEncrypt({
+    default_key_size: 1024
+});
 enc.setPublicKey(PUBLIC_KEY);
-enc.setPublicKey(PRIVATE_KEY);
+enc.setPrivateKey(PRIVATE_KEY);
 
 // 一段长文本json
 let data = {
@@ -78,7 +82,6 @@ let data = {
         card: []
     }
 };
-data = JSON.stringify(data);
 let encrypted = enc.encryptLong(data);
 let endTime = new Date();
 console.log("加密后数据:%o", encrypted);
@@ -162,9 +165,11 @@ cat rsa_1024_pub.pem
         -----END PUBLIC KEY-----`;
 
         // 使用设置公私钥
-        const enc = new JSEncrypt();
+        const enc = new JSEncrypt({
+            default_key_size: 1024
+        });
         enc.setPublicKey(PUBLIC_KEY);
-        enc.setPublicKey(PRIVATE_KEY);
+        enc.setPrivateKey(PRIVATE_KEY);
 
         // 一段长文本json
         let data = {
@@ -177,12 +182,15 @@ cat rsa_1024_pub.pem
                 inter4: ["123123123", "123123123", "123123123", "123123123", "123123123"],
                 inter5: ["123123123", "123123123", "123123123", "123123123", "123123123"],
                 inter6: ["123123123", "123123123", "123123123", "123123123", "123123123"],
+                inter7: ["123123123", "123123123", "123123123", "123123123", "123123123"],
+                inter8: ["123123123", "123123123", "123123123", "123123123", "123123123"],
+                inter9: ["123123123", "123123123", "123123123", "123123123", "123123123"],
+                inter10: ["123123123", "123123123", "123123123", "123123123", "123123123"],
                 stream: {},
                 caton: {},
                 card: []
             }
         };
-        data = JSON.stringify(data);
         let encrypted = enc.encryptLong(data);
         let endTime = new Date();
         console.log("加密后数据:%o", encrypted);

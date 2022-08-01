@@ -158,18 +158,44 @@ export class RSAKey {
     }
 
     /**
+     * 加密入参处理
+     * @param {any} val 加密串入参
+     */
+    private makeSecureStr(val:any) {
+        if (typeof val === "string") {
+            return val;
+        }
+        try {
+            const res = JSON.stringify(val, null, .5);
+            return res;
+        } catch (e) {
+            throw new TypeError("is a type error, make sure your encrypt text is right.");
+        }
+    }
+
+    /**
      * 长文本加密
-     * @param {string} string 待加密长文本
+     * @param {string} any 待加密长文本或json对象
+     * @param {number} size 密钥长度
      * @returns {string} 加密后的base64编码
      */
-    public encryptLong(text:string) {
+    public encryptLong(text:any, size:number) {
         const maxLength = ((this.n.bitLength() + 7) >> 3) - 11;
 
+        text = this.makeSecureStr(text);
         try {
             let ct = "";
 
             if (text.length > maxLength) {
-                const lt = text.match(/.{1,117}/g);
+                let reg = /.{1,117}/g;
+                switch (size) {
+                    case 512: reg = /.{1,53}/g; break;
+                    case 1024: reg = /.{1,117}/g; break;
+                    case 2048: reg = /.{1,245}/g; break;
+                    case 4096: reg = /.{1,501}/g; break;
+                    default: reg = /.{1,117}/g; break;
+                }
+                const lt = text.match(reg);
                 lt.forEach((entry:string) => {
                     const t1 = this.encrypt(entry);
                     ct += t1;
@@ -187,15 +213,24 @@ export class RSAKey {
     /**
      * 长文本解密
      * @param {string} string 加密后的base64编码
+     * @param {number} size 密钥长度
      * @returns {string} 解密后的原文
      */
-    public decryptLong(text:string) {
+    public decryptLong(text:string, size:number) {
         const maxLength = (this.n.bitLength() + 7) >> 3;
         text = b64tohex(text);
         try {
             if (text.length > maxLength) {
                 let ct = "";
-                const lt = text.match(/.{1,256}/g); // 128位解密。取256位
+                let reg = /.{1,256}/g;
+                switch (size) {
+                    case 512: reg = /.{1,128}/g; break;
+                    case 1024: reg = /.{1,256}/g; break;
+                    case 2048: reg = /.{1,512}/g; break;
+                    case 4096: reg = /.{1,1024}/g; break;
+                    default: reg = /.{1,256}/g; break;
+                }
+                const lt = text.match(reg); // 128位解密。取256位
                 lt.forEach((entry) => {
                     const t1 = this.decrypt(entry);
                     ct += t1;
