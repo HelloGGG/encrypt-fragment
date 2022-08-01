@@ -2956,25 +2956,8 @@ var RSAKey = /** @class */ (function () {
         }
     };
     /**
-     * 加密入参处理
-     * @param {any} val 加密串入参
-     */
-    RSAKey.prototype.makeSecureStr = function (val) {
-        if (typeof val === "string") {
-            return val;
-        }
-        try {
-            var res = JSON.stringify(val, null, .5);
-            return res;
-        }
-        catch (e) {
-            throw new TypeError("is a type error, make sure your encrypt text is right.");
-        }
-    };
-
-    /**
      * 长文本加密
-     * @param {string} string 待加密长文本或json对象
+     * @param {string} string 待加密长文本
      * @returns {string} 加密后的base64编码
      */
     RSAKey.prototype.encryptLong = function (string) {
@@ -2982,50 +2965,53 @@ var RSAKey = /** @class */ (function () {
         var maxLength = (((k.n.bitLength() + 7) >> 3) - 11);
         // console.log('maxLength', maxLength)
         try {
-            var subStr="", encryptedString = "";
+            var subStr = "", encryptedString = "";
             var subStart = 0;
             var bitLen = 0;
-            for(var i = 0, len = string.length; i < len; i++){
+            for (var i = 0, len = string.length; i < len; i++) {
                 //js 是使用 Unicode 编码的，每个字符所占用的字节数不同
                 var charCode = string.charCodeAt(i);
                 var increment = 0;
-                if(charCode <= 0x007f) {
+                if (charCode <= 0x007f) {
                     increment = 1;
-                }else if(charCode <= 0x07ff){
+                }
+                else if (charCode <= 0x07ff) {
                     increment = 2;
-                }else if(charCode <= 0xffff){
+                }
+                else if (charCode <= 0xffff) {
                     increment = 3;
-                }else{
+                }
+                else {
                     increment = 4;
                 }
                 bitLen += increment;
-            
                 //字节数到达上限，获取子字符串加密并追加到总字符串后。更新下一个字符串起始位置及字节计算。
                 if (bitLen > maxLength) {
                     // 本位字符加上会过长，回到上一位
-                    i--
+                    i--;
                     subStr = string.substring(subStart, i);
                     // console.log(subStart, i, subStr);
-                    let t = k.encrypt(subStr);
+                    var t = k.encrypt(subStr);
                     // console.log(t)
-                    encryptedString += t
+                    encryptedString += t;
                     // substring第i位不会被取到。-1是因为进入下次循环时，i+1导致上一位被忽略，得回去把它带上
                     subStart = i--;
                     bitLen = 0;
                 }
             }
-            subStr=string.substring(subStart,len)
+            subStr = string.substring(subStart, len);
             // console.log(subStr)
             encryptedString += k.encrypt(subStr);
             // return encryptedString
             return hex2b64(encryptedString);
-        } catch (ex) {
-          return false;
+        }
+        catch (ex) {
+            return false;
         }
     };
     /**
      * 长文本解密
-     * @param {string} string 加密后的base64编码
+     * @param {string} text 加密后的base64编码
      * @returns {string} 解密后的原文
      */
     RSAKey.prototype.decryptLong = function (text) {
@@ -3034,9 +3020,9 @@ var RSAKey = /** @class */ (function () {
         text = b64tohex(text);
         try {
             if (text.length > maxLength) {
-                var ct_2 = "";
+                var ct_1 = "";
                 var reg = /.{1,256}/g;
-                const size = maxLength * 8;
+                var size = maxLength * 8;
                 switch (size) {
                     case 512:
                         reg = /.{1,128}/g;
@@ -3057,9 +3043,9 @@ var RSAKey = /** @class */ (function () {
                 var lt = text.match(reg); // 128位解密。取256位
                 lt.forEach(function (entry) {
                     var t1 = _this.decrypt(entry);
-                    ct_2 += t1;
+                    ct_1 += t1;
                 });
-                return ct_2;
+                return ct_1;
             }
             var y = this.decrypt(text);
             return y;
@@ -5406,7 +5392,7 @@ var JSEncrypt = /** @class */ (function () {
                 uncrypted = this.getKey().decryptLong(encrypted) || "";
                 if (count > 10) {
                     // 重复加密不能大于10次
-                    console.log('加密次数过多')
+                    console.log('加密次数过多');
                     break;
                 }
             }
